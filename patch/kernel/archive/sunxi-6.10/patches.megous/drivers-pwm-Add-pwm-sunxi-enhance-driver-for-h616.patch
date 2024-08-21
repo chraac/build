@@ -1,4 +1,4 @@
-From b4ea287b834fc89cb06a938614527eea5d5c676c Mon Sep 17 00:00:00 2001
+From 0fb15c313712ddb6bcd3f1c5a731524f43f1dd6c Mon Sep 17 00:00:00 2001
 From: chraac <chraac@gmail.com>
 Date: Thu, 15 Aug 2024 23:38:44 +0800
 Subject: drivers: pwm: Add pwm-sunxi-enhance driver for h616
@@ -13,10 +13,10 @@ Subject: drivers: pwm: Add pwm-sunxi-enhance driver for h616
  create mode 100644 drivers/pwm/pwm-sunxi-enhance.h
 
 diff --git a/drivers/pwm/Kconfig b/drivers/pwm/Kconfig
-index 3e53838990f5..9f28493bc043 100644
+index 1dd7921194f5..1265855872fe 100644
 --- a/drivers/pwm/Kconfig
 +++ b/drivers/pwm/Kconfig
-@@ -645,6 +645,15 @@ config PWM_SUN4I
+@@ -621,6 +621,15 @@ config PWM_SUN4I
  	  To compile this driver as a module, choose M here: the module
  	  will be called pwm-sun4i.
  
@@ -33,10 +33,10 @@ index 3e53838990f5..9f28493bc043 100644
  	tristate "Sunplus PWM support"
  	depends on ARCH_SUNPLUS || COMPILE_TEST
 diff --git a/drivers/pwm/Makefile b/drivers/pwm/Makefile
-index 0be4f3e6dd43..e5535d30b460 100644
+index 90913519f11a..ff177f6b73b6 100644
 --- a/drivers/pwm/Makefile
 +++ b/drivers/pwm/Makefile
-@@ -59,6 +59,7 @@ obj-$(CONFIG_PWM_STM32)		+= pwm-stm32.o
+@@ -57,6 +57,7 @@ obj-$(CONFIG_PWM_STM32)		+= pwm-stm32.o
  obj-$(CONFIG_PWM_STM32_LP)	+= pwm-stm32-lp.o
  obj-$(CONFIG_PWM_STMPE)		+= pwm-stmpe.o
  obj-$(CONFIG_PWM_SUN4I)		+= pwm-sun4i.o
@@ -46,7 +46,7 @@ index 0be4f3e6dd43..e5535d30b460 100644
  obj-$(CONFIG_PWM_TIECAP)	+= pwm-tiecap.o
 diff --git a/drivers/pwm/pwm-sunxi-enhance.c b/drivers/pwm/pwm-sunxi-enhance.c
 new file mode 100644
-index 000000000000..6604c447b3b0
+index 000000000000..70e6005a160c
 --- /dev/null
 +++ b/drivers/pwm/pwm-sunxi-enhance.c
 @@ -0,0 +1,1193 @@
@@ -114,6 +114,7 @@ index 000000000000..6604c447b3b0
 +
 +struct sunxi_pwm_chip
 +{
++    struct pwm_chip chip;
 +    void __iomem *base;
 +    struct sunxi_pwm_config *config;
 +    struct clk *bus_clk;
@@ -123,7 +124,7 @@ index 000000000000..6604c447b3b0
 +
 +static inline struct sunxi_pwm_chip *to_sunxi_pwm_chip(struct pwm_chip *chip)
 +{
-+    return pwmchip_get_drvdata(chip);
++    return container_of(chip, struct sunxi_pwm_chip, chip);
 +}
 +
 +static inline u32 sunxi_pwm_readl(struct pwm_chip *chip, u32 offset)
@@ -1036,29 +1037,18 @@ index 000000000000..6604c447b3b0
 +static int sunxi_pwm_probe(struct platform_device *pdev)
 +{
 +    int ret;
-+    unsigned int npwm;
-+    struct pwm_chip *chip;
 +    struct sunxi_pwm_chip *pwm;
 +    struct device_node *np = pdev->dev.of_node;
 +    int i;
 +    struct platform_device *pwm_pdevice;
 +    struct device_node *sub_np;
 +
-+    /* read property pwm-number */
-+    ret = of_property_read_u32(np, "pwm-number", &npwm);
-+    if (ret < 0)
++    pwm = devm_kzalloc(&pdev->dev, sizeof(*pwm), GFP_KERNEL);
++    if (!pwm)
 +    {
-+        dev_err(&pdev->dev, "failed to get pwm number: %d, force to one!\n", ret);
-+        /* force to one pwm if read property fail */
-+        npwm = 1;
++        dev_err(&pdev->dev, "failed to allocate memory!\n");
++        return -ENOMEM;
 +    }
-+
-+    chip = devm_pwmchip_alloc(&pdev->dev, npwm, sizeof(*pwm));
-+    if (IS_ERR(chip)) {
-+        return PTR_ERR(chip);
-+    }
-+
-+    pwm = to_sunxi_pwm_chip(chip);
 +
 +    /* io map pwm base */
 +    pwm->base = (void __iomem *)of_iomap(pdev->dev.of_node, 0);
@@ -1069,35 +1059,43 @@ index 000000000000..6604c447b3b0
 +        goto err_iomap;
 +    }
 +
++    /* read property pwm-number */
++    ret = of_property_read_u32(np, "pwm-number", &pwm->chip.npwm);
++    if (ret < 0)
++    {
++        dev_err(&pdev->dev, "failed to get pwm number: %d, force to one!\n", ret);
++        /* force to one pwm if read property fail */
++        pwm->chip.npwm = 1;
++    }
++
 +    /* read property pwm-base */
-+    ret = of_property_read_u32(np, "pwm-base", &chip->id);
++    ret = of_property_read_u32(np, "pwm-base", &pwm->chip.id);
 +    if (ret < 0)
 +    {
 +        dev_err(&pdev->dev, "failed to get pwm-base: %d, force to -1 !\n", ret);
 +        /* force to one pwm if read property fail */
-+        chip->id = -1;
++        pwm->chip.id = -1;
 +    }
-+
-+    chip->dev.parent = &pdev->dev;
-+    chip->ops = &sunxi_pwm_ops;
++    pwm->chip.dev.parent = &pdev->dev;
++    pwm->chip.ops = &sunxi_pwm_ops;
 +
 +    /* add pwm chip to pwm-core */
-+    ret = pwmchip_add(chip);
++    ret = pwmchip_add(&pwm->chip);
 +    if (ret < 0)
 +    {
 +        dev_err(&pdev->dev, "pwmchip_add() failed: %d\n", ret);
 +        goto err_add;
 +    }
-+    platform_set_drvdata(pdev, chip);
++    platform_set_drvdata(pdev, pwm);
 +
-+    pwm->config = devm_kzalloc(&pdev->dev, sizeof(*pwm->config) * npwm, GFP_KERNEL);
++    pwm->config = devm_kzalloc(&pdev->dev, sizeof(*pwm->config) * pwm->chip.npwm, GFP_KERNEL);
 +    if (!pwm->config)
 +    {
 +        dev_err(&pdev->dev, "failed to allocate memory!\n");
 +        goto err_alloc;
 +    }
 +
-+    for (i = 0; i < npwm; i++)
++    for (i = 0; i < pwm->chip.npwm; i++)
 +    {
 +        sub_np = of_parse_phandle(np, "sunxi-pwms", i);
 +        if (IS_ERR_OR_NULL(sub_np))
@@ -1159,21 +1157,22 @@ index 000000000000..6604c447b3b0
 +
 +err_get_config:
 +err_alloc:
-+    pwmchip_remove(chip);
++    pwmchip_remove(&pwm->chip);
 +err_add:
 +    iounmap(pwm->base);
 +err_iomap:
 +    return ret;
 +}
 +
-+static void sunxi_pwm_remove(struct platform_device *pdev)
++static int sunxi_pwm_remove(struct platform_device *pdev)
 +{
-+    struct pwm_chip *chip = platform_get_drvdata(pdev);
-+    struct sunxi_pwm_chip *pwm = to_sunxi_pwm_chip(chip);
++    struct sunxi_pwm_chip *pwm = platform_get_drvdata(pdev);
 +    clk_disable(pwm->clk);
 +    clk_disable(pwm->bus_clk);
 +    reset_control_assert(pwm->pwm_rst_clk);
-+    pwmchip_remove(chip);
++    pwmchip_remove(&pwm->chip);
++
++    return 0;
 +}
 +
 +static int sunxi_pwm_suspend(struct platform_device *pdev, pm_message_t state)
@@ -1311,5 +1310,4 @@ index 000000000000..e25e10bf5a3d
 +#endif
 +
 -- 
-2.35.3
-
+GitLab
