@@ -1,4 +1,4 @@
-From 13fd8eeedfa109777433ec8a0f3af1c715251eec Mon Sep 17 00:00:00 2001
+From 0fb15c313712ddb6bcd3f1c5a731524f43f1dd6c Mon Sep 17 00:00:00 2001
 From: chraac <chraac@gmail.com>
 Date: Thu, 15 Aug 2024 23:38:44 +0800
 Subject: drivers: pwm: Add pwm-sunxi-enhance driver for h616
@@ -13,10 +13,10 @@ Subject: drivers: pwm: Add pwm-sunxi-enhance driver for h616
  create mode 100644 drivers/pwm/pwm-sunxi-enhance.h
 
 diff --git a/drivers/pwm/Kconfig b/drivers/pwm/Kconfig
-index 4b956d661755..ebc35b44e9f2 100644
+index 1dd7921194f5..1265855872fe 100644
 --- a/drivers/pwm/Kconfig
 +++ b/drivers/pwm/Kconfig
-@@ -625,6 +625,15 @@ config PWM_SUN4I
+@@ -621,6 +621,15 @@ config PWM_SUN4I
  	  To compile this driver as a module, choose M here: the module
  	  will be called pwm-sun4i.
  
@@ -33,10 +33,10 @@ index 4b956d661755..ebc35b44e9f2 100644
  	tristate "Sunplus PWM support"
  	depends on ARCH_SUNPLUS || COMPILE_TEST
 diff --git a/drivers/pwm/Makefile b/drivers/pwm/Makefile
-index c5ec9e168ee7..b39ae3ec8be9 100644
+index 90913519f11a..ff177f6b73b6 100644
 --- a/drivers/pwm/Makefile
 +++ b/drivers/pwm/Makefile
-@@ -58,6 +58,7 @@ obj-$(CONFIG_PWM_STM32)		+= pwm-stm32.o
+@@ -57,6 +57,7 @@ obj-$(CONFIG_PWM_STM32)		+= pwm-stm32.o
  obj-$(CONFIG_PWM_STM32_LP)	+= pwm-stm32-lp.o
  obj-$(CONFIG_PWM_STMPE)		+= pwm-stmpe.o
  obj-$(CONFIG_PWM_SUN4I)		+= pwm-sun4i.o
@@ -46,7 +46,7 @@ index c5ec9e168ee7..b39ae3ec8be9 100644
  obj-$(CONFIG_PWM_TIECAP)	+= pwm-tiecap.o
 diff --git a/drivers/pwm/pwm-sunxi-enhance.c b/drivers/pwm/pwm-sunxi-enhance.c
 new file mode 100644
-index 000000000000..06ef70d85b0f
+index 000000000000..70e6005a160c
 --- /dev/null
 +++ b/drivers/pwm/pwm-sunxi-enhance.c
 @@ -0,0 +1,1193 @@
@@ -722,7 +722,7 @@ index 000000000000..06ef70d85b0f
 +    int ret;
 +
 +    index = pwm->hwpwm;
-+    sub_np = of_parse_phandle(chip->dev->of_node, "sunxi-pwms", index);
++    sub_np = of_parse_phandle(pwmchip_parent(chip)->of_node, "sunxi-pwms", index);
 +    if (IS_ERR_OR_NULL(sub_np))
 +    {
 +        pr_err("%s: can't parse \"sunxi-pwms\" property\n", __func__);
@@ -768,7 +768,7 @@ index 000000000000..06ef70d85b0f
 +    pwm_index[1] = bind_num - (int)chip->id;
 +
 +    /*set current pwm pin state*/
-+    sub_np[0] = of_parse_phandle(chip->dev->of_node, "sunxi-pwms", pwm_index[0]);
++    sub_np[0] = of_parse_phandle(pwmchip_parent(chip)->of_node, "sunxi-pwms", pwm_index[0]);
 +    if (IS_ERR_OR_NULL(sub_np[0]))
 +    {
 +        pr_err("%s: can't parse \"sunxi-pwms\" property\n", __func__);
@@ -782,7 +782,7 @@ index 000000000000..06ef70d85b0f
 +    }
 +
 +    /*set bind pwm pin state*/
-+    sub_np[1] = of_parse_phandle(chip->dev->of_node, "sunxi-pwms", pwm_index[1]);
++    sub_np[1] = of_parse_phandle(pwmchip_parent(chip)->of_node, "sunxi-pwms", pwm_index[1]);
 +    if (IS_ERR_OR_NULL(sub_np[1]))
 +    {
 +        pr_err("%s: can't parse \"sunxi-pwms\" property\n", __func__);
@@ -852,7 +852,7 @@ index 000000000000..06ef70d85b0f
 +    struct platform_device *pwm_pdevice;
 +
 +    index = pwm->hwpwm;
-+    sub_np = of_parse_phandle(chip->dev->of_node, "sunxi-pwms", index);
++    sub_np = of_parse_phandle(pwmchip_parent(chip)->of_node, "sunxi-pwms", index);
 +    if (IS_ERR_OR_NULL(sub_np))
 +    {
 +        pr_err("%s: can't parse \"sunxi-pwms\" property\n", __func__);
@@ -908,7 +908,7 @@ index 000000000000..06ef70d85b0f
 +    pwm_index[1] = bind_num - (int)chip->id;
 +
 +    /* get current index pwm device */
-+    sub_np[0] = of_parse_phandle(chip->dev->of_node, "pwms", pwm_index[0]);
++    sub_np[0] = of_parse_phandle(pwmchip_parent(chip)->of_node, "pwms", pwm_index[0]);
 +    if (IS_ERR_OR_NULL(sub_np[0]))
 +    {
 +        pr_err("%s: can't parse \"pwms\" property\n", __func__);
@@ -921,7 +921,7 @@ index 000000000000..06ef70d85b0f
 +        return;
 +    }
 +    /* get bind pwm device */
-+    sub_np[1] = of_parse_phandle(chip->dev->of_node, "pwms", pwm_index[1]);
++    sub_np[1] = of_parse_phandle(pwmchip_parent(chip)->of_node, "pwms", pwm_index[1]);
 +    if (IS_ERR_OR_NULL(sub_np[1]))
 +    {
 +        pr_err("%s: can't parse \"pwms\" property\n", __func__);
@@ -1076,7 +1076,7 @@ index 000000000000..06ef70d85b0f
 +        /* force to one pwm if read property fail */
 +        pwm->chip.id = -1;
 +    }
-+    pwm->chip.dev = &pdev->dev;
++    pwm->chip.dev.parent = &pdev->dev;
 +    pwm->chip.ops = &sunxi_pwm_ops;
 +
 +    /* add pwm chip to pwm-core */
@@ -1310,5 +1310,4 @@ index 000000000000..e25e10bf5a3d
 +#endif
 +
 -- 
-2.35.3
-
+GitLab

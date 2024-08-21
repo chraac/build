@@ -1,10 +1,8 @@
-From dcd31eb5491f0a8a54567857d4a66a6f7cc10b48 Mon Sep 17 00:00:00 2001
+From e4f6baf0e8d317b22daff4a2a5667950a717bd6a Mon Sep 17 00:00:00 2001
 From: chraac <chraac@gmail.com>
 Date: Fri, 16 Aug 2024 16:44:41 +0800
 Subject: driver: allwinner h618 emac
 
-commit:
-97b476246bc79756423cf6c1d4907606c9633d4b
 ---
  drivers/gpio/gpiolib-of.c                     |   29 +-
  drivers/mfd/Kconfig                           |   10 +
@@ -29,7 +27,7 @@ commit:
  create mode 100644 include/linux/mfd/ac200.h
 
 diff --git a/drivers/gpio/gpiolib-of.c b/drivers/gpio/gpiolib-of.c
-index 5c4442200118..af4a5ae2fd5f 100644
+index 89d5e64cf68b..fc3ac57bb67d 100644
 --- a/drivers/gpio/gpiolib-of.c
 +++ b/drivers/gpio/gpiolib-of.c
 @@ -25,21 +25,6 @@
@@ -76,12 +74,12 @@ index 5c4442200118..af4a5ae2fd5f 100644
   * of_get_named_gpio() - Get a GPIO number to use with GPIO API
   * @np:		device node to get GPIO from
 diff --git a/drivers/mfd/Kconfig b/drivers/mfd/Kconfig
-index d791ce40f63f..ded9baa9dd55 100644
+index 266b4f54af60..3b81f50f95e6 100644
 --- a/drivers/mfd/Kconfig
 +++ b/drivers/mfd/Kconfig
-@@ -203,6 +203,16 @@ config MFD_AC200
+@@ -191,6 +191,16 @@ config MFD_AC100
  	  This driver include only the core APIs. You have to select individual
- 	  components like Ethernet PHY or codec under the corresponding menus.
+ 	  components like codecs or RTC under the corresponding menus.
  
 +config MFD_AC200_SUNXI
 +	tristate "X-Powers AC200 (Sunxi)"
@@ -97,13 +95,13 @@ index d791ce40f63f..ded9baa9dd55 100644
  	tristate
  	select MFD_CORE
 diff --git a/drivers/mfd/Makefile b/drivers/mfd/Makefile
-index 0c3b4aaf4eb7..bc180cf44009 100644
+index db1ba39de3b5..f1fd50749112 100644
 --- a/drivers/mfd/Makefile
 +++ b/drivers/mfd/Makefile
-@@ -141,6 +141,7 @@ obj-$(CONFIG_MFD_DA9052_I2C)	+= da9052-i2c.o
+@@ -140,6 +140,7 @@ obj-$(CONFIG_MFD_DA9052_SPI)	+= da9052-spi.o
+ obj-$(CONFIG_MFD_DA9052_I2C)	+= da9052-i2c.o
  
  obj-$(CONFIG_MFD_AC100)		+= ac100.o
- obj-$(CONFIG_MFD_AC200)		+= ac200.o
 +obj-$(CONFIG_MFD_AC200_SUNXI)		+= sunxi-ac200.o
  obj-$(CONFIG_MFD_AXP20X)	+= axp20x.o
  obj-$(CONFIG_MFD_AXP20X_I2C)	+= axp20x-i2c.o
@@ -3705,12 +3703,12 @@ index 000000000000..926516835023
 +}
 +MODULE_LICENSE("Dual BSD/GPL");
 diff --git a/drivers/net/phy/Kconfig b/drivers/net/phy/Kconfig
-index ddee1d6b5a2d..8cefee900679 100644
+index 7fddc8306d82..e907dffd1a5a 100644
 --- a/drivers/net/phy/Kconfig
 +++ b/drivers/net/phy/Kconfig
-@@ -83,6 +83,14 @@ config AC200_PHY
+@@ -81,6 +81,14 @@ config AIR_EN8811H_PHY
  	help
- 	  Fast ethernet PHY as found in X-Powers AC200 multi-function device.
+ 	  Currently supports the Airoha EN8811H PHY.
  
 +config AC200_PHY_SUNXI
 +	tristate "AC200 EPHY(Sunxi)"
@@ -3724,17 +3722,17 @@ index ddee1d6b5a2d..8cefee900679 100644
  	tristate "AMD and Altima PHYs"
  	help
 diff --git a/drivers/net/phy/Makefile b/drivers/net/phy/Makefile
-index 8624cedf2721..07093e0f0841 100644
+index 202ed7f450da..bfd6209782fa 100644
 --- a/drivers/net/phy/Makefile
 +++ b/drivers/net/phy/Makefile
-@@ -33,6 +33,7 @@ sfp-obj-$(CONFIG_SFP)		+= sfp-bus.o
+@@ -32,6 +32,7 @@ obj-$(CONFIG_SFP)		+= sfp.o
+ sfp-obj-$(CONFIG_SFP)		+= sfp-bus.o
  obj-y				+= $(sfp-obj-y) $(sfp-obj-m)
  
- obj-$(CONFIG_AC200_PHY)		+= ac200-phy.o
 +obj-$(CONFIG_AC200_PHY_SUNXI)		+= sunxi-ephy.o
  obj-$(CONFIG_ADIN_PHY)		+= adin.o
  obj-$(CONFIG_ADIN1100_PHY)	+= adin1100.o
- obj-$(CONFIG_AMD_PHY)		+= amd.o
+ obj-$(CONFIG_AIR_EN8811H_PHY)   += air_en8811h.o
 diff --git a/drivers/net/phy/sunxi-ephy.c b/drivers/net/phy/sunxi-ephy.c
 new file mode 100644
 index 000000000000..92f5ba101ced
@@ -4515,5 +4513,4 @@ index d0f66a5e1b2a..71349cac1a67 100644
  
  #include <linux/errno.h>
 -- 
-2.35.3
-
+GitLab
