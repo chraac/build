@@ -263,5 +263,7 @@
 	patches.megous/nvmem-sunxi_sid-add-sunxi_get_soc_chipid-sunxi_get_serial.mk_format_patch
 	patches.megous/drivers-pwm-Add-pwm-sunxi-enhance-driver-for-h616.patch
 	patches.megous/driver-allwinner-h618-emac.patch
+	patches.megous/arm64-dts-allwinner-h616-Add-thermal-sensor-and-thermal-zones.patch
+	patches.megous/arm64-dts-allwinner-sun50i-h616-Add-GPU-node.patch
 	patches.megous/arm64-dts-allwinner-h616-Add-efuse_xlate-cpu-frequency-scaling-.patch
 	patches.megous/arm64-dts-sun50i-h618-orangepi-zero2w-add-dtb.patch

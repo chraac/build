@@ -1,4 +1,4 @@
-From ceb95126a13c5788c5266d5099d312cfb3a27478 Mon Sep 17 00:00:00 2001
+From 3e95a8d31e402b867f8f458e0df5a085a44ae5ed Mon Sep 17 00:00:00 2001
 From: chraac <chraac@gmail.com>
 Date: Fri, 15 Mar 2024 12:30:26 +0800
 Subject: [PATCH] orangepi-zero2w add dtb
@@ -71,7 +71,7 @@ index 921d5f61d8d6..dff8a2f3d0af 100644
  			compatible = "allwinner,sun50i-h616-spdif";
  			reg = <0x05093000 0x400>;
 diff --git a/arch/arm64/boot/dts/allwinner/sun50i-h618-orangepi-zero2w.dts b/arch/arm64/boot/dts/allwinner/sun50i-h618-orangepi-zero2w.dts
-index 6a4f0da97233..3960fcc56ead 100644
+index 6a4f0da97233..bdfc3a1af689 100644
 --- a/arch/arm64/boot/dts/allwinner/sun50i-h618-orangepi-zero2w.dts
 +++ b/arch/arm64/boot/dts/allwinner/sun50i-h618-orangepi-zero2w.dts
 @@ -7,10 +7,15 @@
@@ -139,7 +139,7 @@ index 6a4f0da97233..3960fcc56ead 100644
  		};
  	};
  
-@@ -52,91 +86,387 @@ reg_vcc3v3: vcc3v3 {
+@@ -52,91 +86,377 @@ reg_vcc3v3: vcc3v3 {
  		vin-supply = <&reg_vcc5v>;
  		regulator-always-on;
  	};
@@ -147,7 +147,6 @@ index 6a4f0da97233..3960fcc56ead 100644
  
 -&cpu0 {
 -	cpu-supply = <&reg_dcdc2>;
--};
 +	reg_vcc_wifi_io: vcc-wifi-io {
 +		/* Always on 1.8V/300mA regulator for WiFi and BT IO */
 +		compatible = "regulator-fixed";
@@ -157,9 +156,7 @@ index 6a4f0da97233..3960fcc56ead 100644
 +		regulator-always-on;
 +		vin-supply = <&reg_vcc3v3>;
 +	};
- 
--&ehci1 {
--	status = "okay";
++
 +	wifi_pwrseq: wifi-pwrseq {
 +		compatible = "mmc-pwrseq-simple";
 +		clocks = <&rtc 1>;
@@ -414,22 +411,7 @@ index 6a4f0da97233..3960fcc56ead 100644
 +				};
 +			};
 +		};
-+
-+		gpu: gpu@1800000 {
-+			compatible = "allwinner,sun50i-h616-mali",
-+				     "arm,mali-bifrost";
-+			reg = <0x1800000 0x40000>;
-+			interrupts = <GIC_SPI 95 IRQ_TYPE_LEVEL_HIGH>,
-+				     <GIC_SPI 96 IRQ_TYPE_LEVEL_HIGH>,
-+				     <GIC_SPI 97 IRQ_TYPE_LEVEL_HIGH>;
-+			interrupt-names = "job", "mmu", "gpu";
-+			clocks = <&ccu CLK_GPU0>, <&ccu CLK_BUS_GPU>;
-+			clock-names = "core", "bus";
-+			resets = <&ccu RST_BUS_GPU>;
-+			mali-supply = <&reg_dcdc1>;
-+			status = "disabled";
-+		};
-+
++		
 +		addr_mgt: addr-mgt {
 +			compatible = "allwinner,sunxi-addr_mgt";
 +			type_addr_wifi = <0x2>;
@@ -444,6 +426,13 @@ index 6a4f0da97233..3960fcc56ead 100644
 +		allwinner,pipelines = <&mixer0>;
 +		status = "okay";
 +	};
+ };
+ 
+-&ehci1 {
+-	status = "okay";
++&gpu {
++	mali-supply = <&reg_dcdc1>;
++	status = "disabled";
  };
  
 -/* USB 2 & 3 are on the FPC connector (or the exansion board) */
@@ -500,13 +489,13 @@ index 6a4f0da97233..3960fcc56ead 100644
 +		compatible = "ethernet-phy-ieee802.3-c22";
 +		reg = <1>;
 +	};
-+};
-+
-+&ehci0 {
-+	status = "disabled";
  };
  
 -&r_i2c {
++&ehci0 {
++	status = "disabled";
++};
++
 +&ehci1 {
  	status = "okay";
 +};
@@ -587,7 +576,7 @@ index 6a4f0da97233..3960fcc56ead 100644
  };
  
  &spi0  {
-@@ -153,12 +483,77 @@ flash@0 {
+@@ -153,12 +473,77 @@ flash@0 {
  	};
  };
  
@@ -665,7 +654,7 @@ index 6a4f0da97233..3960fcc56ead 100644
  &usbotg {
  	/*
  	 * PHY0 pins are connected to a USB-C socket, but a role switch
-@@ -179,3 +574,128 @@ &usbphy {
+@@ -179,3 +564,128 @@ &usbphy {
  	usb1_vbus-supply = <&reg_vcc5v>;
  	status = "okay";
  };
