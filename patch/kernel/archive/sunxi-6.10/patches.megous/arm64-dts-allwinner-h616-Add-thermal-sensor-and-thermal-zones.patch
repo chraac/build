@@ -1,0 +1,119 @@
+From 14386e14a87e08bff223be039ac856d00009934d Mon Sep 17 00:00:00 2001
+From: Kali Prasad <kprasadvnsi@protonmail.com>
+Date: Sun, 19 Sep 2021 08:02:27 +0000
+Subject: arm64: dts: allwinner: h616: Add thermal sensor and thermal zones
+
+There are four sensors, CPU, GPU, VE, and DDR.
+
+Signed-off-by: Kali Prasad <kprasadvnsi@protonmail.com>
+---
+ .../arm64/boot/dts/allwinner/sun50i-h616.dtsi | 29 +++++++++++++++----
+ 1 file changed, 23 insertions(+), 6 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/allwinner/sun50i-h616.dtsi b/arch/arm64/boot/dts/allwinner/sun50i-h616.dtsi
+index 921d5f61d8d6..35ec95ed63f6 100644
+--- a/arch/arm64/boot/dts/allwinner/sun50i-h616.dtsi
++++ b/arch/arm64/boot/dts/allwinner/sun50i-h616.dtsi
+@@ -26,6 +26,7 @@ cpu0: cpu@0 {
+ 			reg = <0>;
+ 			enable-method = "psci";
+ 			clocks = <&ccu CLK_CPUX>;
++			clock-latency-ns = <244144>; /* 8 32k periods */
+ 			#cooling-cells = <2>;
+ 		};
+ 
+@@ -35,6 +36,7 @@ cpu1: cpu@1 {
+ 			reg = <1>;
+ 			enable-method = "psci";
+ 			clocks = <&ccu CLK_CPUX>;
++			clock-latency-ns = <244144>; /* 8 32k periods */
+ 			#cooling-cells = <2>;
+ 		};
+ 
+@@ -44,6 +46,7 @@ cpu2: cpu@2 {
+ 			reg = <2>;
+ 			enable-method = "psci";
+ 			clocks = <&ccu CLK_CPUX>;
++			clock-latency-ns = <244144>; /* 8 32k periods */
+ 			#cooling-cells = <2>;
+ 		};
+ 
+@@ -53,6 +56,7 @@ cpu3: cpu@3 {
+ 			reg = <3>;
+ 			enable-method = "psci";
+ 			clocks = <&ccu CLK_CPUX>;
++			clock-latency-ns = <244144>; /* 8 32k periods */
+ 			#cooling-cells = <2>;
+ 		};
+ 	};
+@@ -864,24 +868,37 @@ cpu-thermal {
+ 			polling-delay = <1000>;
+ 			thermal-sensors = <&ths 2>;
+ 			sustainable-power = <1000>;
++			k_po = <20>;
++			k_pu = <40>;
++			k_i = <0>;
+ 
+ 			trips {
+-				cpu_threshold: cpu-trip-0 {
++				cpu_threshold: trip-point@0 {
+ 					temperature = <60000>;
+ 					type = "passive";
+ 					hysteresis = <0>;
+ 				};
+-				cpu_target: cpu-trip-1 {
++				cpu_target: trip-point@1 {
+ 					temperature = <70000>;
+ 					type = "passive";
+ 					hysteresis = <0>;
+ 				};
+-				cpu_critical: cpu-trip-2 {
++				cpu_critical: trip-point@2 {
+ 					temperature = <110000>;
+ 					type = "critical";
+ 					hysteresis = <0>;
+ 				};
+ 			};
++
++			cooling-maps {
++				map0 {
++					trip = <&cpu_target>;
++					cooling-device = <&cpu0 THERMAL_NO_LIMIT THERMAL_NO_LIMIT>,
++							 <&cpu1 THERMAL_NO_LIMIT THERMAL_NO_LIMIT>,
++							 <&cpu2 THERMAL_NO_LIMIT THERMAL_NO_LIMIT>,
++							 <&cpu3 THERMAL_NO_LIMIT THERMAL_NO_LIMIT>;
++				};
++			};
+ 		};
+ 
+ 		gpu-thermal {
+@@ -891,7 +908,7 @@ gpu-thermal {
+ 			sustainable-power = <1100>;
+ 
+ 			trips {
+-				gpu_temp_critical: gpu-trip-0 {
++				gpu_temp_critical: trip-point@0 {
+ 					temperature = <110000>;
+ 					type = "critical";
+ 					hysteresis = <0>;
+@@ -905,7 +922,7 @@ ve-thermal {
+ 			thermal-sensors = <&ths 1>;
+ 
+ 			trips {
+-				ve_temp_critical: ve-trip-0 {
++				ve_temp_critical: trip-point@0 {
+ 					temperature = <110000>;
+ 					type = "critical";
+ 					hysteresis = <0>;
+@@ -919,7 +936,7 @@ ddr-thermal {
+ 			thermal-sensors = <&ths 3>;
+ 
+ 			trips {
+-				ddr_temp_critical: ddr-trip-0 {
++				ddr_temp_critical: trip-point@0 {
+ 					temperature = <110000>;
+ 					type = "critical";
+ 					hysteresis = <0>;
+-- 
+2.35.3
+
