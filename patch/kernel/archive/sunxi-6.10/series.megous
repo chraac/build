@@ -260,7 +260,10 @@
 -	patches.megous/Add-README.md-with-information-and-u-boot-patches.patch
 	patches.megous/Defconfigs-for-all-my-devices.patch
 	patches.megous/Update-defconfigs.patch
+	patches.megous/drv-nvmem-sunxi_sid-Support-SID-on-H616.patch
+	patches.megous/drv-thermal-sun8i_thermal-Add-for-H616.patch
 	patches.megous/nvmem-sunxi_sid-add-sunxi_get_soc_chipid-sunxi_get_serial.mk_format_patch
+	patches.megous/drv-iio-adc-axp20x_adc-arm64-dts-axp803-hwmon-enable-thermal.patch
 	patches.megous/drivers-pwm-Add-pwm-sunxi-enhance-driver-for-h616.patch
 	patches.megous/driver-allwinner-h618-emac.patch
 	patches.megous/arm64-dts-allwinner-h616-Add-thermal-sensor-and-thermal-zones.patch
