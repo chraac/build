@@ -8,11 +8,11 @@ two additional temperature sensors for VE and DDR.
 
 Signed-off-by: Kali Prasad <kprasadvnsi@protonmail.com>
 ---
- drivers/thermal/sun8i_thermal.c | 94 +++++++++++++++++++++++++++++++--
- 1 file changed, 91 insertions(+), 3 deletions(-)
+ drivers/thermal/sun8i_thermal.c | 99 +++++++++++++++++++++++++++++++--
+ 1 file changed, 93 insertions(+), 6 deletions(-)
 
 diff --git a/drivers/thermal/sun8i_thermal.c b/drivers/thermal/sun8i_thermal.c
-index c6a82ef84aca..c1dc688eb449 100644
+index c6a82ef84aca..362a4e7fa517 100644
 --- a/drivers/thermal/sun8i_thermal.c
 +++ b/drivers/thermal/sun8i_thermal.c
 @@ -112,6 +112,12 @@ static int sun50i_h5_calc_temp(struct ths_device *tmdev,
@@ -124,9 +124,16 @@ index c6a82ef84aca..c1dc688eb449 100644
  
  static int sun8i_ths_register(struct ths_device *tmdev)
  {
-@@ -720,10 +808,10 @@ static const struct ths_thermal_chip sun50i_h616_ths = {
- 	.offset = 263655,
- 	.scale = 810,
+@@ -715,15 +803,14 @@ static const struct ths_thermal_chip sun20i_d1_ths = {
+ static const struct ths_thermal_chip sun50i_h616_ths = {
+ 	.sensor_num = 4,
+ 	.has_bus_clk_reset = true,
+-	.needs_sram = true,
+ 	.ft_deviation = 8000,
+-	.offset = 263655,
+-	.scale = 810,
++	.offset = -3255,
++	.scale = -81,
  	.temp_data_base = SUN50I_H6_THS_TEMP_DATA,
 -	.calibrate = sun50i_h6_ths_calibrate,
 -	.init = sun50i_h6_thermal_init,

@@ -172,3 +172,5 @@
 	patches.armbian/Sound-for-H616-H618-Allwinner-SOCs.patch
 	patches.armbian/ARM64-dts-sun50i-h616-BigTreeTech-CB1-Enable-HDMI.patch
 	patches.armbian/ARM64-dts-sun50i-h616-BigTreeTech-CB1-Enable-EMAC1.patch
+	patches.armbian/drv-thermal-sun8i_thermal-Add-for-H616.patch
+	patches.armbian/arm64-dts-allwinner-h616-Add-thermal-sensor-and-thermal-zones.patch
