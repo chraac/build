@@ -51,7 +51,7 @@ function apt_find_upstream_package_version_and_download_url() {
 	esac
 	package_info_download_url_file="$(mktemp)"
 	curl --silent --show-error --max-time 10 $package_info_download_url -o $package_info_download_url_file
-	found_package_filename=$(jq -r .[\"${package_download_release}\"].${ARCH} $package_info_download_url_file)
+	found_package_filename=$(jq -r ".[\"${package_download_release}\"].${ARCH}" "$package_info_download_url_file")
 
 	if [[ "${found_package_filename}" == "${sought_package_name}_"* ]]; then
 		display_alert "Found upstream base-files package filename" "${found_package_filename}" "info"
